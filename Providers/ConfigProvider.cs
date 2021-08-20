@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using gitup.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,18 +11,19 @@ namespace gitup.Providers
 {
 	public static class ConfigProvider
 	{
-		static string filePath = System.IO.Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
-		static string fileName = "gitup-config.json";
+		private static string filePath = System.IO.Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
+		private static string fileName = "gitup-config.json";
+		private static string fileFullPath => $@"{filePath}\{fileName}"; 
 		public static void Write(ConfigModel config)
 		{
-			File.WriteAllText(filePath + @"\" + fileName, JsonConvert.SerializeObject(config, Formatting.Indented), Encoding.UTF8);
+			File.WriteAllText(fileFullPath, JsonConvert.SerializeObject(config, Formatting.Indented), Encoding.UTF8);
 		}
 
 		public static ConfigModel Read()
 		{
-			if (File.Exists(filePath + @"\" + fileName))
+			if (File.Exists(fileFullPath))
 			{
-				var config = File.ReadAllText(filePath + @"\" + fileName);
+				var config = File.ReadAllText(fileFullPath);
 				var model = JsonConvert.DeserializeObject<ConfigModel>(config);
 				if (model.GitPaths == null)
 				{
@@ -49,5 +51,14 @@ namespace gitup.Providers
 	{
 		public string Path;
 		public string Name;
+		public ConfigGitPathModel()
+		{
+
+		}
+		public ConfigGitPathModel(RepositoryModel model)
+		{
+			this.Path = model.Path;
+			this.Name = model.RepoName;
+		}
 	}
 }

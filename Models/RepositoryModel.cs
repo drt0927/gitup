@@ -22,7 +22,7 @@ namespace gitup.Models
 	public class RepositoryModel : INotifyPropertyChanged
 	{
 
-		#region " Private "
+		#region " Private Members "
 		private static readonly object _lock = new object();
 		private string _accessToken { get; set; }
 		private BranchModel _currentBranch { get; set; }
@@ -32,7 +32,7 @@ namespace gitup.Models
 		private bool _isFetchProgressStart { get; set; }
 		#endregion
 
-		#region " Public "
+		#region " Public Members "
 		public string RepoName { get; set; }
 		public string Path { get; set; }
 		public string ParentPath { get; set; }
@@ -42,11 +42,11 @@ namespace gitup.Models
 			get => _currentBranch;
 			set
 			{
+				var pre = _currentBranch;
+				_currentBranch = value;
+
 				DispatcherUtil.BeginInvoke(new Action(() =>
 				{
-					var pre = _currentBranch;
-					_currentBranch = value;
-
 					// Branches 변경 로직
 					if (!Checkout(value.Name))
 					{
@@ -113,6 +113,7 @@ namespace gitup.Models
 		public ICommand OpenChangesCommand { get; set; }
 		#endregion
 
+		#region " 생성자 "
 		public RepositoryModel()
 		{
 			FetchClickCommand = new DelegateCommand(Fetch);
@@ -122,24 +123,62 @@ namespace gitup.Models
 			OpenChangesCommand = new DelegateCommand(OpenChanges);
 		}
 
+		public RepositoryModel(Repository repo, string accessToken) : this()
+		{
+			var di = new DirectoryInfo(repo.Info.Path);
+			InitMembers(di, repo, accessToken);
+		}
+
 		public RepositoryModel(DirectoryInfo di, string accessToken) : this()
 		{
-			this._accessToken = accessToken;
 			using (var repo = new Repository(di.FullName))
 			{
-				this.ChangesCount = repo.GetChangesCount();
-				this.RepoName = di.Parent.Name;
-				this.Path = di.FullName;
-				this.ParentPath = di.Parent.FullName;
-				this.Branches = new List<BranchModel>(repo.Branches.GetLocalBranchModels());
-				this.OriginBranches = new List<BranchModel>(repo.Branches.GetRemoteBranchModels());
-				this.CurrentBranch = this.Branches.FirstOrDefault(b => b.Name == repo.Head.FriendlyName);
-				BindingOperations.EnableCollectionSynchronization(Branches, _lock);
-				BindingOperations.EnableCollectionSynchronization(OriginBranches, _lock);
+				InitMembers(di, repo, accessToken);
+			}
+		}
+		#endregion
+
+		#region " Private Methods "
+		private void InitMembers(DirectoryInfo di, Repository repo, string accessToken)
+		{
+			this._accessToken = accessToken;
+			this.RepoName = di.Parent.Name;
+			this.Path = di.FullName;
+			this.ParentPath = di.Parent.FullName;
+			this.RebindMembers(repo);
+			BindingOperations.EnableCollectionSynchronization(this.Branches, _lock);
+			BindingOperations.EnableCollectionSynchronization(this.OriginBranches, _lock);
+		}
+
+		private void ValidAccessToken()
+		{
+			if (string.IsNullOrEmpty(this._accessToken))
+			{
+				throw new Exception("AccessToken이 없으면 Fetch할 수 없습니다.");
 			}
 		}
 
-		private bool Checkout(string branchName)
+		private void RebindMembers(Repository repo)
+		{
+			if (this.Branches == null)
+			{
+				this.Branches = new List<BranchModel>();
+			}
+			if (this.OriginBranches == null)
+			{
+				this.OriginBranches = new List<BranchModel>();
+			}
+			this.Branches.Clear();
+			this.Branches.AddRange(repo.Branches.Where(b => !b.FriendlyName.ToLower().StartsWith("origin")).Select(b => new BranchModel(b)));
+			this.OriginBranches.Clear();
+			this.OriginBranches.AddRange(repo.Branches.Where(b => b.FriendlyName.ToLower().StartsWith("origin") && !b.FriendlyName.ToLower().StartsWith("origin/HEAD".ToLower())).Select(b => new BranchModel(b)));
+			this._currentBranch = this.Branches.FirstOrDefault(b => b.Name == repo.Head.FriendlyName);
+			this.ChangesCount = repo.GetChangesCount();
+		}
+		#endregion
+
+		#region " Public Methods "
+		public bool Checkout(string branchName)
 		{
 			bool result = false;
 
@@ -191,10 +230,7 @@ namespace gitup.Models
 			{
 				IsFetchProgressStart = true;
 
-				if (string.IsNullOrEmpty(this._accessToken))
-				{
-					throw new Exception("AccessToken이 없으면 Fetch할 수 없습니다.");
-				}
+				ValidAccessToken();
 
 				await Task.Run(() =>
 				{
@@ -207,28 +243,14 @@ namespace gitup.Models
 							return;
 						}
 
-						var signature = repo.Config.BuildSignature(DateTimeOffset.Now);
+						var fetchOptionsAndSignature = repo.GetFetchOptionsAndSignature(this._accessToken);
 						var options = new PullOptions();
-
-						options.FetchOptions = new FetchOptions();
-						options.FetchOptions.CredentialsProvider = new CredentialsHandler(
-							(url, usernameFromUrl, types) =>
-								new UsernamePasswordCredentials()
-								{
-									Username = signature.Name,
-									Password = this._accessToken
-								});
-						options.FetchOptions.TagFetchMode = TagFetchMode.All;
+						options.FetchOptions = fetchOptionsAndSignature.FetchOptions;
 
 						// Pull
-						var merge = Commands.Pull(repo, signature, options);
+						var merge = Commands.Pull(repo, fetchOptionsAndSignature.Signature, options);
 
-						this.Branches.Clear();
-						this.Branches.AddRange(repo.Branches.Where(b => !b.FriendlyName.ToLower().StartsWith("origin")).Select(b => new BranchModel(b)));
-						this.OriginBranches.Clear();
-						this.OriginBranches.AddRange(repo.Branches.Where(b => b.FriendlyName.ToLower().StartsWith("origin") && !b.FriendlyName.ToLower().StartsWith("origin/HEAD".ToLower())).Select(b => new BranchModel(b)));
-						this.CurrentBranch = this.Branches.FirstOrDefault(b => b.Name == repo.Head.FriendlyName);
-						this.ChangesCount = repo.GetChangesCount();
+						this.RebindMembers(repo);
 					}
 				});
 
@@ -236,7 +258,7 @@ namespace gitup.Models
 			}
 			catch (Exception ex)
 			{
-				throw ex;
+				LogProvider.Instance.Error(new Exception($"[{this.RepoName}] Pull 도중 에러가 발생하였습니다.\r\n{ex.Message}"));
 			}
 			finally
 			{
@@ -250,26 +272,14 @@ namespace gitup.Models
 			{
 				IsFetchProgressStart = true;
 
-				if (string.IsNullOrEmpty(this._accessToken))
-				{
-					throw new Exception("AccessToken이 없으면 Fetch할 수 없습니다.");
-				}
+				ValidAccessToken();
 
 				await Task.Run(() =>
 				{
 					string logMessage = "";
 					using (var repo = new Repository(this.Path))
 					{
-						var signature = repo.Config.BuildSignature(DateTimeOffset.Now);
-
-						FetchOptions options = new FetchOptions();
-						options.CredentialsProvider = new CredentialsHandler((url, usernameFromUrl, types) =>
-							new UsernamePasswordCredentials()
-							{
-								Username = signature.Name,
-								Password = this._accessToken
-							});
-						options.TagFetchMode = TagFetchMode.All;
+						FetchOptions options = repo.GetFetchOptionsAndSignature(this._accessToken).FetchOptions;
 
 						foreach (Remote remote in repo.Network.Remotes)
 						{
@@ -277,12 +287,7 @@ namespace gitup.Models
 							Commands.Fetch(repo, remote.Name, refSpecs, options, logMessage);
 						}
 
-						this.Branches.Clear();
-						this.Branches.AddRange(repo.Branches.Where(b => !b.FriendlyName.ToLower().StartsWith("origin")).Select(b => new BranchModel(b)));
-						this.OriginBranches.Clear();
-						this.OriginBranches.AddRange(repo.Branches.Where(b => b.FriendlyName.ToLower().StartsWith("origin") && !b.FriendlyName.ToLower().StartsWith("origin/HEAD".ToLower())).Select(b => new BranchModel(b)));
-						this.CurrentBranch = this.Branches.FirstOrDefault(b => b.Name == repo.Head.FriendlyName);
-						this.ChangesCount = repo.GetChangesCount();
+						this.RebindMembers(repo);
 					}
 				});
 
@@ -290,7 +295,7 @@ namespace gitup.Models
 			}
 			catch (Exception ex)
 			{
-				throw ex;
+				LogProvider.Instance.Error(new Exception($"[{this.RepoName}] Fetch 도중 에러가 발생하였습니다.\r\n{ex.Message}"));
 			}
 			finally
 			{
@@ -327,11 +332,14 @@ namespace gitup.Models
 				window.ShowDialog();
 			}
 		}
+		#endregion
 
+		#region " PropertyChanged "
 		public event PropertyChangedEventHandler PropertyChanged;
 		public void OnPropertyChanged(string propertyName)
 		{
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
+		#endregion
 	}
 }

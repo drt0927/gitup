@@ -42,7 +42,15 @@
 					</Style>
 				</DataGrid.RowStyle>
 				<DataGrid.Columns>
-					<DataGridTextColumn Header="Name" Binding="{Binding RepoName}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Name" Binding="{Binding RepoName}" IsReadOnly="True">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="Changes" Binding="{Binding ChangesCount, Mode=TwoWay}" IsReadOnly="True">
 						<DataGridTextColumn.ElementStyle>
 							<Style TargetType="TextBlock">
