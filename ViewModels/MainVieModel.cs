@@ -81,6 +81,7 @@ namespace gitup.ViewModels
 
 			if (string.IsNullOrWhiteSpace(this.Filter) || this.Filter.Length == 0)
 			{
+				var a = 1;
 				e.Accepted = true;
 			}
 			else
