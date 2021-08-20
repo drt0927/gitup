@@ -1,4 +1,4 @@
-﻿using gitup.Common;
+﻿using gitup.Providers;
 using gitup.Models;
 using gitup.ViewModels;
 using System;
@@ -24,7 +24,7 @@ namespace gitup
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-		private RepositoryViewModel _viewModel;
+		private MainVieModel _viewModel;
 		private ShortcutProvider _shortcutProvider;
 		public MainWindow()
 		{
@@ -32,7 +32,7 @@ namespace gitup
 
 			LogProvider.Instance.LogAdded += Instance_LogAdded;
 
-			#region " Shorcut Add "
+			#region " Shortcut Add "
 			_shortcutProvider = new ShortcutProvider(CommandBindings);
 			_shortcutProvider.AddEvent(Key.F, ModifierKeys.Control, (object sender, ExecutedRoutedEventArgs e) =>
 			{
@@ -75,7 +75,7 @@ namespace gitup
 			allFetchTimer.Start();
 			#endregion
 
-			_viewModel = new RepositoryViewModel();
+			_viewModel = new MainVieModel();
 			this.DataContext = _viewModel;
 		}
 

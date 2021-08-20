@@ -74,9 +74,10 @@
     <Compile Include="CommitsWindow.xaml.cs">
       <DependentUpon>CommitsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Common\ConfigProvider.cs" />
-    <Compile Include="Common\LogProvider.cs" />
-    <Compile Include="Common\ShortcutProvider.cs" />
+    <Compile Include="Extensions\RepositoryExtensions.cs" />
+    <Compile Include="Providers\ConfigProvider.cs" />
+    <Compile Include="Providers\LogProvider.cs" />
+    <Compile Include="Providers\ShortcutProvider.cs" />
     <Compile Include="Models\BranchModel.cs" />
     <Compile Include="Models\ChangeModel.cs" />
     <Compile Include="Models\CommitModel.cs" />
@@ -84,9 +85,10 @@
     <Compile Include="SettingWindow.xaml.cs">
       <DependentUpon>SettingWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Utils\DispatcherUtil.cs" />
     <Compile Include="ViewModels\ChangesViewModel.cs" />
     <Compile Include="ViewModels\CommitsViewModel.cs" />
-    <Compile Include="ViewModels\RepositoryViewModel.cs" />
+    <Compile Include="ViewModels\MainVieModel.cs" />
     <Page Include="ChangesWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -139,6 +141,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

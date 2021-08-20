@@ -43,7 +43,7 @@
 				</DataGrid.RowStyle>
 				<DataGrid.Columns>
 					<DataGridTextColumn Header="Name" Binding="{Binding RepoName}" IsReadOnly="True"/>
-					<DataGridTextColumn Header="Changes" Binding="{Binding Changes, Mode=TwoWay}" IsReadOnly="True">
+                    <DataGridTextColumn Header="Changes" Binding="{Binding ChangesCount, Mode=TwoWay}" IsReadOnly="True">
 						<DataGridTextColumn.ElementStyle>
 							<Style TargetType="TextBlock">
 								<Setter Property="HorizontalAlignment" Value="Center"/>
@@ -92,8 +92,21 @@
 						<DataGridTemplateColumn.CellTemplate>
 							<DataTemplate>
 								<StackPanel Orientation="Vertical">
-									<Button Content="Fetch" IsEnabled="{Binding IsFetchButtonEnable}" Command="{Binding FetchClickCommand}"/>
-									<ProgressBar IsIndeterminate="{Binding IsFetchProgressStart}" Height="10"/>
+                                    <Button Content="Fetch" Command="{Binding FetchClickCommand}">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsFetchProgressStart}" Value="True">
+                                                        <Setter Property="IsEnabled" Value="False"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsFetchProgressStart}" Value="False">
+                                                        <Setter Property="IsEnabled" Value="True"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                    <ProgressBar IsIndeterminate="{Binding IsFetchProgressStart}" Height="10"/>
 								</StackPanel>
 							</DataTemplate>
 						</DataGridTemplateColumn.CellTemplate>
@@ -102,8 +115,21 @@
 						<DataGridTemplateColumn.CellTemplate>
 							<DataTemplate>
 								<StackPanel Orientation="Vertical">
-									<Button Content="Pull" IsEnabled="{Binding IsFetchButtonEnable}" Command="{Binding PullClickCommand}"/>
-									<ProgressBar IsIndeterminate="{Binding IsFetchProgressStart}" Height="10"/>
+                                    <Button Content="Pull" Command="{Binding PullClickCommand}">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsFetchProgressStart}" Value="True">
+                                                        <Setter Property="IsEnabled" Value="False"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsFetchProgressStart}" Value="False">
+                                                        <Setter Property="IsEnabled" Value="True"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                    <ProgressBar IsIndeterminate="{Binding IsFetchProgressStart}" Height="10"/>
 								</StackPanel>
 							</DataTemplate>
 						</DataGridTemplateColumn.CellTemplate>

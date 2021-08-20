@@ -1,4 +1,4 @@
-﻿using gitup.Common;
+﻿using gitup.Providers;
 using System;
 using System.Collections.Generic;
 using System.Configuration;

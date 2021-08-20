@@ -1,4 +1,6 @@
-﻿using gitup.Common;
+﻿using gitup.Extensions;
+using gitup.Providers;
+using gitup.Utils;
 using LibGit2Sharp;
 using LibGit2Sharp.Handlers;
 using Prism.Commands;
@@ -19,50 +21,43 @@ namespace gitup.Models
 {
 	public class RepositoryModel : INotifyPropertyChanged
 	{
-		private readonly object _lock = new object();
+
+		#region " Private "
+		private static readonly object _lock = new object();
 		private string _accessToken { get; set; }
+		private BranchModel _currentBranch { get; set; }
+		private List<BranchModel> _branches { get; set; }
+		private List<BranchModel> _originBranches { get; set; }
+		private int _changesCount { get; set; }
+		private bool _isFetchProgressStart { get; set; }
+		#endregion
+
+		#region " Public "
 		public string RepoName { get; set; }
 		public string Path { get; set; }
 		public string ParentPath { get; set; }
-		public bool IsHighlightRow
-		{
-			get
-			{
-				return (Changes ?? 0) > 0 || (((_currentBranch.Ahead ?? 0) + (_currentBranch.Behind ?? 0))) > 0;
-			}
-		}
-
-		private BranchModel _currentBranch;
+		public bool IsHighlightRow => ChangesCount > 0 || ((_currentBranch.Ahead ?? 0) + (_currentBranch.Behind ?? 0)) > 0;
 		public BranchModel CurrentBranch
 		{
 			get => _currentBranch;
 			set
 			{
-				Application.Current.Dispatcher.BeginInvoke(
-					new Action(() =>
+				DispatcherUtil.BeginInvoke(new Action(() =>
+				{
+					var pre = _currentBranch;
+					_currentBranch = value;
+
+					// Branches 변경 로직
+					if (!Checkout(value.Name))
 					{
-						var pre = _currentBranch;
-						_currentBranch = value;
+						_currentBranch = pre;
+					}
 
-						// Branches 변경 로직
-
-						if (!Checkout(value.Name))
-						{
-
-							_currentBranch = pre;
-							OnPropertyChanged(nameof(CurrentBranch));
-
-							return;
-						}
-
-
-						OnPropertyChanged(nameof(CurrentBranch));
-						OnPropertyChanged(nameof(IsHighlightRow));
-					}), DispatcherPriority.ContextIdle, null);
+					OnPropertyChanged(nameof(CurrentBranch));
+					OnPropertyChanged(nameof(IsHighlightRow));
+				}));
 			}
 		}
-
-		private List<BranchModel> _branches { get; set; }
 		public List<BranchModel> Branches
 		{
 			get => _branches;
@@ -73,8 +68,7 @@ namespace gitup.Models
 				OnPropertyChanged(nameof(BranchDiffCountString));
 			}
 		}
-
-		private List<BranchModel> _originBranches { get; set; }
+		public IEnumerable<string> BranchNames => this.Branches.Select(b => b.OnlyName);
 		public List<BranchModel> OriginBranches
 		{
 			get => _originBranches;
@@ -85,41 +79,21 @@ namespace gitup.Models
 				OnPropertyChanged(nameof(BranchDiffCountString));
 			}
 		}
-
-		public bool IsHighlightBranchDiff
+		public IEnumerable<string> OriginBranchNames => this.OriginBranches.Select(b => b.OnlyName);
+		public int LocalBranchDiffCount => this.BranchNames.Except(this.OriginBranchNames).Count();
+		public int RemoteBranchDiffCount => this.OriginBranchNames.Except(this.BranchNames).Count();
+		public bool IsHighlightBranchDiff => this.LocalBranchDiffCount > 0 || this.RemoteBranchDiffCount > 0;
+		public string BranchDiffCountString => $"↑{this.LocalBranchDiffCount} ↓{this.RemoteBranchDiffCount}";
+		public int ChangesCount
 		{
-			get
-			{
-				var localBranchCnt = this.Branches.Where(x => this.OriginBranches.FirstOrDefault(y => y.Name.Contains(x.Name)) == null);
-				var remoteBranchCnt = this.OriginBranches.Where(x => this.Branches.FirstOrDefault(y => x.Name.Contains(y.Name)) == null);
-
-				return localBranchCnt.Count() > 0 || remoteBranchCnt.Count() > 0;
-			}
-		}
-
-		public string BranchDiffCountString
-		{
-			get
-			{
-				var localBranchCnt = this.Branches.Where(x => this.OriginBranches.FirstOrDefault(y => y.Name.Contains(x.Name)) == null);
-				var remoteBranchCnt = this.OriginBranches.Where(x => this.Branches.FirstOrDefault(y => x.Name.Contains(y.Name)) == null);
-				return $"↑{localBranchCnt.Count()} ↓{remoteBranchCnt.Count()}";
-			}
-		}
-
-		private int? _changes;
-		public int? Changes
-		{
-			get => _changes == 0 ? null : _changes;
+			get => _changesCount;
 			set
 			{
-				_changes = value;
-				OnPropertyChanged(nameof(Changes));
+				_changesCount = value;
+				OnPropertyChanged(nameof(ChangesCount));
 				OnPropertyChanged(nameof(IsHighlightRow));
 			}
 		}
-
-		private bool _isFetchProgressStart;
 		public bool IsFetchProgressStart
 		{
 			get => _isFetchProgressStart;
@@ -127,19 +101,17 @@ namespace gitup.Models
 			{
 				_isFetchProgressStart = value;
 				OnPropertyChanged(nameof(IsFetchProgressStart));
-				OnPropertyChanged(nameof(IsFetchButtonEnable));
 			}
 		}
-		public bool IsFetchButtonEnable
-		{
-			get => !IsFetchProgressStart;
-		}
+		#endregion
 
+		#region " ICommand "
 		public ICommand FetchClickCommand { get; set; }
 		public ICommand PullClickCommand { get; set; }
 		public ICommand GoForkClickCommand { get; set; }
 		public ICommand OpenCommitsCommand { get; set; }
 		public ICommand OpenChangesCommand { get; set; }
+		#endregion
 
 		public RepositoryModel()
 		{
@@ -155,14 +127,13 @@ namespace gitup.Models
 			this._accessToken = accessToken;
 			using (var repo = new Repository(di.FullName))
 			{
-				var status = repo.RetrieveStatus();
-				this._changes = status.Count() - status.Ignored.Count();
+				this.ChangesCount = repo.GetChangesCount();
 				this.RepoName = di.Parent.Name;
 				this.Path = di.FullName;
 				this.ParentPath = di.Parent.FullName;
-				this.Branches = new List<BranchModel>(repo.Branches.Where(b => !b.FriendlyName.ToLower().StartsWith("origin")).Select(b => new BranchModel(b)));
-				this.OriginBranches = new List<BranchModel>(repo.Branches.Where(b => b.FriendlyName.ToLower().StartsWith("origin") && !b.FriendlyName.ToLower().StartsWith("origin/HEAD".ToLower())).Select(b => new BranchModel(b)));
-				this._currentBranch = this.Branches.FirstOrDefault(b => b.Name == repo.Head.FriendlyName);
+				this.Branches = new List<BranchModel>(repo.Branches.GetLocalBranchModels());
+				this.OriginBranches = new List<BranchModel>(repo.Branches.GetRemoteBranchModels());
+				this.CurrentBranch = this.Branches.FirstOrDefault(b => b.Name == repo.Head.FriendlyName);
 				BindingOperations.EnableCollectionSynchronization(Branches, _lock);
 				BindingOperations.EnableCollectionSynchronization(OriginBranches, _lock);
 			}
@@ -183,7 +154,7 @@ namespace gitup.Models
 						throw new Exception("Branch is not found");
 					}
 
-					Commands.Checkout(repo, branch);
+					var newBranch = Commands.Checkout(repo, branch);
 				}
 
 				LogProvider.Instance.Info($"[{this.RepoName} : {branchName}]으로 체크아웃 되었습니다.");
@@ -257,8 +228,7 @@ namespace gitup.Models
 						this.OriginBranches.Clear();
 						this.OriginBranches.AddRange(repo.Branches.Where(b => b.FriendlyName.ToLower().StartsWith("origin") && !b.FriendlyName.ToLower().StartsWith("origin/HEAD".ToLower())).Select(b => new BranchModel(b)));
 						this.CurrentBranch = this.Branches.FirstOrDefault(b => b.Name == repo.Head.FriendlyName);
-						var status = repo.RetrieveStatus();
-						this.Changes = status.Count() - status.Ignored.Count();
+						this.ChangesCount = repo.GetChangesCount();
 					}
 				});
 
@@ -312,8 +282,7 @@ namespace gitup.Models
 						this.OriginBranches.Clear();
 						this.OriginBranches.AddRange(repo.Branches.Where(b => b.FriendlyName.ToLower().StartsWith("origin") && !b.FriendlyName.ToLower().StartsWith("origin/HEAD".ToLower())).Select(b => new BranchModel(b)));
 						this.CurrentBranch = this.Branches.FirstOrDefault(b => b.Name == repo.Head.FriendlyName);
-						var status = repo.RetrieveStatus();
-						this.Changes = status.Count() - status.Ignored.Count();
+						this.ChangesCount = repo.GetChangesCount();
 					}
 				});
 

@@ -10,8 +10,14 @@ namespace gitup.Models
 {
 	public class BranchModel : INotifyPropertyChanged
 	{
-		public string Name { get; set; }
+		#region " Private "
 		private int? _ahead;
+		private int? _behind;
+		#endregion
+
+		#region " Public "
+		public string Name { get; set; }
+		public string OnlyName { get; set; }
 		public int? Ahead
 		{
 			get => _ahead;
@@ -21,7 +27,6 @@ namespace gitup.Models
 				OnPropertyChanged(nameof(Status));
 			}
 		}
-		private int? _behind;
 		public int? Behind
 		{
 			get => _behind;
@@ -31,7 +36,6 @@ namespace gitup.Models
 				OnPropertyChanged(nameof(Status));
 			}
 		}
-
 		public string Status
 		{
 			get
@@ -50,10 +54,12 @@ namespace gitup.Models
 				return status;
 			}
 		}
+		#endregion
 
 		public BranchModel(Branch branch)
 		{
 			this.Name = branch.FriendlyName;
+			this.OnlyName = branch.FriendlyName.Replace("origin/", "");
 			this.Ahead = branch.TrackingDetails.AheadBy;
 			this.Behind = branch.TrackingDetails.BehindBy;
 		}
