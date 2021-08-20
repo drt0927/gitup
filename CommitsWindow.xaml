@@ -1,0 +1,33 @@
+﻿<Window x:Class="gitup.CommitsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:gitup"
+        mc:Ignorable="d"
+        Title="Commits" Height="450" Width="800">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<Grid Grid.Row="0">
+			<DataGrid x:Name="grd" ItemsSource="{Binding Commits}" AutoGenerateColumns="False" CanUserAddRows="False">
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="Subject" Binding="{Binding Subject}" IsReadOnly="True"/>
+					<DataGridTextColumn Header="Author" Binding="{Binding Author}" IsReadOnly="True"/>
+					<DataGridTextColumn Header="ShortId" Binding="{Binding ShortId}" IsReadOnly="True"/>
+					<DataGridTextColumn Header="ParentShortId" Binding="{Binding ParentShortId}" IsReadOnly="True"/>
+					<DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=yyyy-MM-dd HH:mm:ss}" IsReadOnly="True"/>
+					<DataGridTextColumn Header="Branches" Binding="{Binding Branches}" IsReadOnly="True"/>
+					<DataGridTemplateColumn Header="Changes">
+						<DataGridTemplateColumn.CellTemplate>
+							<DataTemplate>
+								<Button Content="Changes" Command="{Binding OpenChangesCommand}"/>
+							</DataTemplate>
+						</DataGridTemplateColumn.CellTemplate>
+					</DataGridTemplateColumn>
+				</DataGrid.Columns>
+			</DataGrid>
+		</Grid>
+	</Grid>
+</Window>
