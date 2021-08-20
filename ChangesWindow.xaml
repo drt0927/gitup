@@ -13,9 +13,39 @@
 		<Grid Grid.Row="0">
 			<DataGrid x:Name="grd" ItemsSource="{Binding Changes}" AutoGenerateColumns="False" CanUserAddRows="False">
 				<DataGrid.Columns>
-					<DataGridTextColumn Header="Status" Binding="{Binding Status}" IsReadOnly="True"/>
-					<DataGridTextColumn Header="State" Binding="{Binding State}" IsReadOnly="True"/>
-					<DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Status" Binding="{Binding StatusString}" IsReadOnly="True" FontWeight="Bold">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Foreground" Value="{Binding StatusColor}"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                        <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="Background" Value="#24292E"/>
+                                <Setter Property="Height" Value="25"/>
+                                <Setter Property="Width" Value="80"/>
+                            </Style>
+                        </DataGridTextColumn.CellStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="State" Binding="{Binding StateString}" IsReadOnly="True" FontWeight="Bold">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Foreground" Value="{Binding StateColor}"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                        <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="Background" Value="#24292E"/>
+                                <Setter Property="Height" Value="25"/>
+                                <Setter Property="Width" Value="80"/>
+                            </Style>
+                        </DataGridTextColumn.CellStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True"/>
 					<DataGridTextColumn Header="Path" Binding="{Binding Path}" IsReadOnly="True"/>
 				</DataGrid.Columns>
 			</DataGrid>

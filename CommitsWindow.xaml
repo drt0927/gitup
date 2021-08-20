@@ -14,8 +14,18 @@
 			<DataGrid x:Name="grd" ItemsSource="{Binding Commits}" AutoGenerateColumns="False" CanUserAddRows="False">
 				<DataGrid.Columns>
 					<DataGridTextColumn Header="Subject" Binding="{Binding Subject}" IsReadOnly="True"/>
-					<DataGridTextColumn Header="Author" Binding="{Binding Author}" IsReadOnly="True"/>
-					<DataGridTextColumn Header="ShortId" Binding="{Binding ShortId}" IsReadOnly="True"/>
+                    <DataGridTemplateColumn Header="Author">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="{Binding Avatar}"/>
+                                    <Label Content="{Binding Author}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <!--<DataGridTextColumn Header="Author" Binding="{Binding Author}" IsReadOnly="True"/>-->
+                    <DataGridTextColumn Header="ShortId" Binding="{Binding ShortId}" IsReadOnly="True"/>
 					<DataGridTextColumn Header="ParentShortId" Binding="{Binding ParentShortId}" IsReadOnly="True"/>
 					<DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=yyyy-MM-dd HH:mm:ss}" IsReadOnly="True"/>
 					<DataGridTextColumn Header="Branches" Binding="{Binding Branches}" IsReadOnly="True"/>
