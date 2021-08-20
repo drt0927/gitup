@@ -192,7 +192,7 @@ namespace gitup.Models
 			}
 			catch (Exception ex)
 			{
-				throw ex;
+				LogProvider.Instance.Error(new Exception($"[{this.RepoName} : {branchName}] 체크아웃 도중 에러가 발생하였습니다.\r\n{ex.Message}"));
 			}
 
 			return result;
