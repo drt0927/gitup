@@ -35,7 +35,7 @@
 					<Style TargetType="DataGridRow">
 						<Setter Property="Height" Value="30"/>
 						<Style.Triggers>
-							<DataTrigger Binding="{Binding IsHighlight}" Value="True">
+							<DataTrigger Binding="{Binding IsHighlightRow}" Value="True">
 								<Setter Property="Background" Value="#d1d1d1"/>
 							</DataTrigger>
 						</Style.Triggers>
@@ -43,7 +43,15 @@
 				</DataGrid.RowStyle>
 				<DataGrid.Columns>
 					<DataGridTextColumn Header="Name" Binding="{Binding RepoName}" IsReadOnly="True"/>
-					<DataGridTextColumn Header="Changes" Binding="{Binding Changes, Mode=TwoWay}" IsReadOnly="True"/>
+					<DataGridTextColumn Header="Changes" Binding="{Binding Changes, Mode=TwoWay}" IsReadOnly="True">
+						<DataGridTextColumn.ElementStyle>
+							<Style TargetType="TextBlock">
+								<Setter Property="HorizontalAlignment" Value="Center"/>
+								<Setter Property="VerticalAlignment" Value="Center"/>
+								<Setter Property="FontWeight" Value="Bold"/>
+							</Style>
+						</DataGridTextColumn.ElementStyle>
+					</DataGridTextColumn>
 					<DataGridTemplateColumn Header="Branch">
 						<DataGridTemplateColumn.CellTemplate>
 							<DataTemplate>
@@ -55,6 +63,30 @@
 							</DataTemplate>
 						</DataGridTemplateColumn.CellTemplate>
 					</DataGridTemplateColumn>
+					<DataGridTemplateColumn Header="OriginBranch">
+						<DataGridTemplateColumn.CellTemplate>
+							<DataTemplate>
+								<ComboBox ItemsSource="{Binding OriginBranches, Mode=TwoWay}"
+										  DisplayMemberPath="Name"
+										  >
+								</ComboBox>
+							</DataTemplate>
+						</DataGridTemplateColumn.CellTemplate>
+					</DataGridTemplateColumn>
+					<DataGridTextColumn Header="Branch Diff" Binding="{Binding BranchDiffCountString}" IsReadOnly="True">
+						<DataGridTextColumn.ElementStyle>
+							<Style TargetType="TextBlock">
+								<Setter Property="HorizontalAlignment" Value="Center"/>
+								<Setter Property="VerticalAlignment" Value="Center"/>
+								<Style.Triggers>
+									<DataTrigger Binding="{Binding IsHighlightBranchDiff}" Value="True">
+										<Setter Property="Foreground" Value="IndianRed"/>
+										<Setter Property="FontWeight" Value="Bold"/>
+									</DataTrigger>
+								</Style.Triggers>
+							</Style>
+						</DataGridTextColumn.ElementStyle>
+					</DataGridTextColumn>
 					<DataGridTextColumn Header="Status" Binding="{Binding CurrentBranch.Status}" IsReadOnly="True"/>
 					<DataGridTemplateColumn Header="Fetch">
 						<DataGridTemplateColumn.CellTemplate>

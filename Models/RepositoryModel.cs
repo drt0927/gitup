@@ -24,7 +24,7 @@ namespace gitup.Models
 		public string RepoName { get; set; }
 		public string Path { get; set; }
 		public string ParentPath { get; set; }
-		public bool IsHighlight
+		public bool IsHighlightRow
 		{
 			get
 			{
@@ -57,7 +57,7 @@ namespace gitup.Models
 
 
 						OnPropertyChanged(nameof(CurrentBranch));
-						OnPropertyChanged(nameof(IsHighlight));
+						OnPropertyChanged(nameof(IsHighlightRow));
 					}), DispatcherPriority.ContextIdle, null);
 			}
 		}
@@ -70,8 +70,43 @@ namespace gitup.Models
 			{
 				_branches = value;
 				OnPropertyChanged(nameof(Branches));
+				OnPropertyChanged(nameof(BranchDiffCountString));
 			}
 		}
+
+		private List<BranchModel> _originBranches { get; set; }
+		public List<BranchModel> OriginBranches
+		{
+			get => _originBranches;
+			set
+			{
+				_originBranches = value;
+				OnPropertyChanged(nameof(OriginBranches));
+				OnPropertyChanged(nameof(BranchDiffCountString));
+			}
+		}
+
+		public bool IsHighlightBranchDiff
+		{
+			get
+			{
+				var localBranchCnt = this.Branches.Where(x => this.OriginBranches.FirstOrDefault(y => y.Name.Contains(x.Name)) == null);
+				var remoteBranchCnt = this.OriginBranches.Where(x => this.Branches.FirstOrDefault(y => x.Name.Contains(y.Name)) == null);
+
+				return localBranchCnt.Count() > 0 || remoteBranchCnt.Count() > 0;
+			}
+		}
+
+		public string BranchDiffCountString
+		{
+			get
+			{
+				var localBranchCnt = this.Branches.Where(x => this.OriginBranches.FirstOrDefault(y => y.Name.Contains(x.Name)) == null);
+				var remoteBranchCnt = this.OriginBranches.Where(x => this.Branches.FirstOrDefault(y => x.Name.Contains(y.Name)) == null);
+				return $"↑{localBranchCnt.Count()} ↓{remoteBranchCnt.Count()}";
+			}
+		}
+
 		private int? _changes;
 		public int? Changes
 		{
@@ -80,7 +115,7 @@ namespace gitup.Models
 			{
 				_changes = value;
 				OnPropertyChanged(nameof(Changes));
-				OnPropertyChanged(nameof(IsHighlight));
+				OnPropertyChanged(nameof(IsHighlightRow));
 			}
 		}
 
@@ -126,8 +161,10 @@ namespace gitup.Models
 				this.Path = di.FullName;
 				this.ParentPath = di.Parent.FullName;
 				this.Branches = new List<BranchModel>(repo.Branches.Where(b => !b.FriendlyName.ToLower().StartsWith("origin")).Select(b => new BranchModel(b)));
+				this.OriginBranches = new List<BranchModel>(repo.Branches.Where(b => b.FriendlyName.ToLower().StartsWith("origin") && !b.FriendlyName.ToLower().StartsWith("origin/HEAD".ToLower())).Select(b => new BranchModel(b)));
 				this._currentBranch = this.Branches.FirstOrDefault(b => b.Name == repo.Head.FriendlyName);
 				BindingOperations.EnableCollectionSynchronization(Branches, _lock);
+				BindingOperations.EnableCollectionSynchronization(OriginBranches, _lock);
 			}
 		}
 
@@ -217,6 +254,8 @@ namespace gitup.Models
 
 						this.Branches.Clear();
 						this.Branches.AddRange(repo.Branches.Where(b => !b.FriendlyName.ToLower().StartsWith("origin")).Select(b => new BranchModel(b)));
+						this.OriginBranches.Clear();
+						this.OriginBranches.AddRange(repo.Branches.Where(b => b.FriendlyName.ToLower().StartsWith("origin") && !b.FriendlyName.ToLower().StartsWith("origin/HEAD".ToLower())).Select(b => new BranchModel(b)));
 						this.CurrentBranch = this.Branches.FirstOrDefault(b => b.Name == repo.Head.FriendlyName);
 						var status = repo.RetrieveStatus();
 						this.Changes = status.Count() - status.Ignored.Count();
@@ -270,6 +309,8 @@ namespace gitup.Models
 
 						this.Branches.Clear();
 						this.Branches.AddRange(repo.Branches.Where(b => !b.FriendlyName.ToLower().StartsWith("origin")).Select(b => new BranchModel(b)));
+						this.OriginBranches.Clear();
+						this.OriginBranches.AddRange(repo.Branches.Where(b => b.FriendlyName.ToLower().StartsWith("origin") && !b.FriendlyName.ToLower().StartsWith("origin/HEAD".ToLower())).Select(b => new BranchModel(b)));
 						this.CurrentBranch = this.Branches.FirstOrDefault(b => b.Name == repo.Head.FriendlyName);
 						var status = repo.RetrieveStatus();
 						this.Changes = status.Count() - status.Ignored.Count();
