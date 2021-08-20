@@ -4,8 +4,11 @@ git multi repo fetch &amp; pull
 # 주의사항
 프로그램 처음 실행 후 Setting화면을 통해 AccessToken과 Root Path를 설정 후 사용하세요.
 
-*AccessToken 생성은 아래 주소를 확인해주세요.  
-https://docs.microsoft.com/ko-kr/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page*
+*AccessToken 생성은 아래 주소를 확인해주세요.*  
+
+  Azure : **https://docs.microsoft.com/ko-kr/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page**  
+  
+  GitHub : **https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token**
 
 # 참고
 * 검색기능은 RepoName과 Branch 이름을 검색합니다.
