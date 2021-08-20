@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
+using gitup.Extensions;
 
 namespace gitup.ViewModels
 {
@@ -81,6 +82,7 @@ namespace gitup.ViewModels
 
 			if (string.IsNullOrWhiteSpace(this.Filter) || this.Filter.Length == 0)
 			{
+				var a = 1;
 				e.Accepted = true;
 			}
 			else
@@ -100,13 +102,11 @@ namespace gitup.ViewModels
 			RepoCollectionViewSource.View.Refresh();
 		}
 
-		private IEnumerable<DirectoryInfo> GetDirs(string root)
+		private IEnumerable<string> GetDirs(string rootPath, string searchPattern)
 		{
-			var rootDir = new DirectoryInfo(root);
-
-			foreach (var di in rootDir.GetDirectories(".git", SearchOption.AllDirectories))
+			foreach (var path in Directory.EnumerateDirectories(rootPath, searchPattern, SearchOption.AllDirectories))
 			{
-				yield return di;
+				yield return path;
 			}
 			yield break;
 		}
@@ -124,31 +124,26 @@ namespace gitup.ViewModels
 
 			await Task.Run(() =>
 			{
-				foreach(var d in GetDirs(this._config.VsPath))
+				foreach(var path in GetDirs(this._config.VsPath, ".git"))
 				{
-					using (var repo = new Repository(d.FullName))
+					var di = new DirectoryInfo(path);
+					using (var repo = new Repository(di.FullName))
 					{
-						var remote = repo.Network.Remotes.FirstOrDefault();
-						if (remote?.Url.ToLower().Contains("amazon") ?? false)
+						var r = repo.GetRepositoryModel(this._config.AccessToken);
+						if (r == null)
 						{
 							continue;
 						}
 
-						var r = new RepositoryModel(d, this._config.AccessToken);
 						this.Repos.Add(r);
-						_config.GitPaths.Add(new ConfigGitPathModel()
-						{
-							Name = r.RepoName,
-							Path = r.Path
-						});
+						_config.GitPaths.Add(new ConfigGitPathModel(r));
 					}
 				}
 
 				this.Repos.OrderBy(x => x.RepoName);
 				_config.GitPaths.OrderBy(x => x.Name);
+				ConfigProvider.Write(_config);
 			});
-
-			ConfigProvider.Write(_config);
 
 			this.IsEnable = true;
 		}
@@ -178,9 +173,8 @@ namespace gitup.ViewModels
 
 		public async void AllFetch()
 		{
-			if (string.IsNullOrEmpty(this._config.AccessToken))
+			if (!this.ValidAccessToken())
 			{
-				System.Windows.MessageBox.Show("AccessToken이 없으면 Fetch할 수 없습니다.");
 				return;
 			}
 
@@ -194,9 +188,8 @@ namespace gitup.ViewModels
 
 		public async void AllPull()
 		{
-			if (string.IsNullOrEmpty(this._config.AccessToken))
+			if (!this.ValidAccessToken())
 			{
-				System.Windows.MessageBox.Show("AccessToken이 없으면 Fetch할 수 없습니다.");
 				return;
 			}
 
@@ -206,6 +199,17 @@ namespace gitup.ViewModels
 			});
 
 			RepoCollectionViewSource.View.Refresh();
+		}
+
+		private bool ValidAccessToken()
+		{
+			if (string.IsNullOrEmpty(this._config.AccessToken))
+			{
+				System.Windows.MessageBox.Show("AccessToken이 없으면 Fetch할 수 없습니다.");
+				return false;
+			}
+
+			return true;
 		}
 	}
 }

@@ -1,4 +1,5 @@
-﻿using LibGit2Sharp;
+﻿using gitup.Extensions;
+using LibGit2Sharp;
 using Prism.Commands;
 using System;
 using System.Collections.Generic;
@@ -26,10 +27,10 @@ namespace gitup.Models
 			this._path = path;
 			this.Subject = commit.MessageShort;
 			this.Author = commit.Author.Name;
-			this.ShortId = commit.Sha.Substring(0, 7);
+			this.ShortId = commit.ShortSha();
 			this.Sha = commit.Sha;
 			this.Date = commit.Author.When;
-			this.ParentShortId = commit.Parents.FirstOrDefault()?.Sha.Substring(0, 7);
+			this.ParentShortId = commit.Parents.FirstOrDefault()?.ShortSha();
 			OpenChangesCommand = new DelegateCommand(OpenChangesWindow);
 		}
 

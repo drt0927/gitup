@@ -12,7 +12,7 @@ namespace gitup.Utils
 	{
 		public static DispatcherOperation BeginInvoke(Action action)
 		{
-			return Application.Current.Dispatcher.BeginInvoke(action, DispatcherPriority.ContextIdle, null);
+			return Application.Current.Dispatcher.BeginInvoke(action, DispatcherPriority.Normal, null);
 		}
 	}
 }

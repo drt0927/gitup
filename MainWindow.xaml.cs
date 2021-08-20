@@ -79,18 +79,18 @@ namespace gitup
 			this.DataContext = _viewModel;
 		}
 
-		private void Instance_LogAdded(object sender, int logType, string log)
+		private void Instance_LogAdded(object sender, LogLevel logLevel, string log)
 		{
 			Run r = new Run(log);
-			if (logType == 1) // debug
+			if (logLevel == LogLevel.Debug)
 			{
 				r.Foreground = Brushes.Green;
 			}
-			else if (logType == 2) // info
+			else if (logLevel == LogLevel.Info)
 			{
 				r.Foreground = Brushes.CadetBlue;
 			}
-			else if (logType ==3) // error
+			else if (logLevel == LogLevel.Error)
 			{
 				r.Foreground = Brushes.IndianRed;
 			}
@@ -114,6 +114,7 @@ namespace gitup
 			setting.WindowStartupLocation = WindowStartupLocation.CenterOwner;
 			if (setting.ShowDialog() ?? false)
 			{
+				rtbLog.Document.Blocks.Clear();
 				_viewModel.ReadFolder();
 			}
 		}
