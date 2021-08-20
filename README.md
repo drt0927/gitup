@@ -12,10 +12,13 @@ https://docs.microsoft.com/ko-kr/azure/devops/organizations/accounts/use-persona
 
 ## 기능
 1. Fetch
-2. Branch CheckOut
-3. Commit List
-4. Change List
-5. Pull (* 충돌시 예외처리 기능 없습니다. 프로그램 죽을지도 모릅니다.)
+2. Pull (* 충돌시 예외처리 기능 없습니다. 프로그램 죽을지도 모릅니다.)
+3. Branch CheckOut (Only Local)
+4. Commit List
+5. Changes List
+7. Local과 Remote의 브런치 개수 비교
+8. Fork.exe 실행
+9. 현재 상태값 확인
 
 # 단축키
 1. Ctrl + F : 검색 인풋박스 포커스
