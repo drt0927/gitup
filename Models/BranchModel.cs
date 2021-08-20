@@ -39,12 +39,12 @@ namespace gitup.Models
 				string status = string.Empty;
 				if (Ahead != null && Ahead != 0)
 				{
-					status += $" {Ahead}↑";
+					status += $" ↑{Ahead}";
 				}
 
 				if (Behind != null && Behind != 0)
 				{
-					status += $" {Behind}↓";
+					status += $" ↓{Behind}";
 				}
 
 				return status;
