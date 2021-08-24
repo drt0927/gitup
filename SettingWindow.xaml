@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:gitup"
         mc:Ignorable="d"
-        Title="Setting" Height="130" Width="420">
+        Title="Setting" Height="200" Width="420">
     <Grid>
 		<StackPanel Orientation="Vertical">
 			<StackPanel Orientation="Horizontal">
@@ -13,9 +13,19 @@
 				<TextBox Name="tbAccessToken" Width="300" />
 			</StackPanel>
 			<StackPanel Orientation="Horizontal">
+				<Label Content="Path Type: " Width="100"/>
+				<RadioButton Name="rbRootPath" GroupName="PathType" Content="Root Folder" VerticalAlignment="Center" Checked="PathType_Checked" />
+				<RadioButton Name="rbSlnPath" GroupName="PathType" Content="sln File" VerticalAlignment="Center" Checked="PathType_Checked" />
+			</StackPanel>
+			<StackPanel Name="spRootPath" Orientation="Horizontal">
 				<Label Content="Path : " Width="100"/>
-				<TextBox Name="tbPath" Width="200" />
-				<Button Content="Find" Width="100" Click="PathFind_Click"/>
+				<TextBox Name="tbRootPath" Width="200" />
+				<Button Name="btnRootPath" Content="Find" Width="100" Click="PathFind_Click"/>
+			</StackPanel>
+			<StackPanel Name="spSlnPath" Orientation="Horizontal">
+				<Label Content="sln Path : " Width="100"/>
+				<TextBox Name="tbSlnPath" Width="200" />
+				<Button Name="btnSlnPath" Content="Find" Width="100" Click="SlnPathFind_Click"/>
 			</StackPanel>
 			<StackPanel Orientation="Horizontal" Margin="10" HorizontalAlignment="Center">
 				<Button Content="Save" Width="100" Click="Save_Click"/>

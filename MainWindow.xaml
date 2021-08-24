@@ -24,8 +24,14 @@
 			</StackPanel>
 
 			<StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-				<Button Content="All Fetch" Width="90" Command="{Binding AllFetchClickCommand}" IsEnabled="{Binding IsEnable}"/>
-				<Button Content="All Pull" Width="90" Command="{Binding AllPullClickCommand}" IsEnabled="{Binding IsEnable}"/>
+				<StackPanel>
+					<Button Content="Selected Fetch" Width="90" IsEnabled="{Binding IsEnable}" Click="SelFetch_Click" Background="AliceBlue"/>
+					<Button Content="All Fetch" Width="90" Command="{Binding AllFetchClickCommand}" IsEnabled="{Binding IsEnable}"/>
+				</StackPanel>
+				<StackPanel>
+					<Button Content="Selected Pull" Width="90" IsEnabled="{Binding IsEnable}" Click="SelPull_Click" Background="AliceBlue"/>
+					<Button Content="All Pull" Width="90" Command="{Binding AllPullClickCommand}" IsEnabled="{Binding IsEnable}"/>
+				</StackPanel>
 				<Button Content="Setting" Width="90" Name="btnSetting" Click="btnSetting_Click" IsEnabled="{Binding IsEnable}"/>
 			</StackPanel>
 		</Grid>
@@ -44,9 +50,8 @@
 				<DataGrid.Columns>
                     <DataGridTextColumn Header="Name" Binding="{Binding RepoName}" IsReadOnly="True">
                         <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                <Setter Property="VerticalAlignment" Value="Center"/>
+							<Style TargetType="TextBlock">
+								<Setter Property="VerticalAlignment" Value="Center"/>
                                 <Setter Property="FontWeight" Value="Bold"/>
                             </Style>
                         </DataGridTextColumn.ElementStyle>

@@ -15,6 +15,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 using gitup.Extensions;
+using System.Text.RegularExpressions;
 
 namespace gitup.ViewModels
 {
@@ -71,8 +72,8 @@ namespace gitup.ViewModels
 			RepoCollectionViewSource.Source = this.Repos;
 			RepoCollectionViewSource.Filter += RepoCollectionViewSource_Filter;
 
-			AllFetchClickCommand = new DelegateCommand(AllFetch);
-			AllPullClickCommand = new DelegateCommand(AllPull);
+			AllFetchClickCommand = new DelegateCommand(async () => await AllFetch());
+			AllPullClickCommand = new DelegateCommand(async () => await AllPull());
 			LoadClickCommand = new DelegateCommand(LoadRepos);
 		}
 
@@ -82,7 +83,6 @@ namespace gitup.ViewModels
 
 			if (string.IsNullOrWhiteSpace(this.Filter) || this.Filter.Length == 0)
 			{
-				var a = 1;
 				e.Accepted = true;
 			}
 			else
@@ -113,7 +113,7 @@ namespace gitup.ViewModels
 
 		public async void ReadFolder()
 		{
-			if (string.IsNullOrEmpty(this._config.VsPath))
+			if (this._config.PathType == 1 && string.IsNullOrEmpty(this._config.RootPath))
 			{
 				return;
 			}
@@ -124,7 +124,7 @@ namespace gitup.ViewModels
 
 			await Task.Run(() =>
 			{
-				foreach(var path in GetDirs(this._config.VsPath, ".git"))
+				foreach (var path in GetDirs(this._config.RootPath, ".git"))
 				{
 					var di = new DirectoryInfo(path);
 					using (var repo = new Repository(di.FullName))
@@ -148,17 +148,78 @@ namespace gitup.ViewModels
 			this.IsEnable = true;
 		}
 
-		public async void LoadRepos()
+		public async void ReadSlnFile()
 		{
-			if (string.IsNullOrEmpty(this._config.VsPath))
+			if (this._config.PathType == 2 && string.IsNullOrEmpty(this._config.SlnPath))
 			{
 				return;
 			}
 
 			this.IsEnable = false;
+			this.Repos.Clear();
+			this._config.GitPaths.Clear();
+
+			await Task.Run(() =>
+			{
+				string slnContents = File.ReadAllText(this._config.SlnPath);
+				var pattern = @"Project\(""({.*?})""\)\s*=\s*""(.*?)""\s*,\s*""(.*?)""\s*,\s*""(.*?)""\s*EndProject";
+				var matches = Regex.Matches(slnContents, pattern);
+
+				var slnInfo = new FileInfo(this._config.SlnPath);
+				foreach (Match m in matches)
+				{
+					var projectPath = m.Groups[3].ToString();
+					var filePath = System.IO.Path.Combine(slnInfo.DirectoryName, projectPath);
+					var fileInfo = new FileInfo(filePath);
+					var gitfolder = fileInfo.Directory.GetDirectories(".git", SearchOption.TopDirectoryOnly).FirstOrDefault();
+
+					if (gitfolder == null)
+					{
+						continue;
+					}
+
+					using (var repo = new Repository(fileInfo.Directory.FullName))
+					{
+						var r = repo.GetRepositoryModel(this._config.AccessToken);
+						if (r == null)
+						{
+							continue;
+						}
+
+						this.Repos.Add(r);
+						_config.GitPaths.Add(new ConfigGitPathModel(r));
+					}
+				}
+
+				//foreach (var path in GetDirs(this._config.RootPath, ".git"))
+				//{
+				//	var di = new DirectoryInfo(path);
+				//	using (var repo = new Repository(di.FullName))
+				//	{
+				//		var r = repo.GetRepositoryModel(this._config.AccessToken);
+				//		if (r == null)
+				//		{
+				//			continue;
+				//		}
+
+				//		this.Repos.Add(r);
+				//		_config.GitPaths.Add(new ConfigGitPathModel(r));
+				//	}
+				//}
+
+				this.Repos.OrderBy(x => x.RepoName);
+				_config.GitPaths.OrderBy(x => x.Name);
+				ConfigProvider.Write(_config);
+			});
+
+			this.IsEnable = true;
+		}
+
+		public async void LoadRepos()
+		{
+			this.IsEnable = false;
 
 			this.Repos.Clear();
-
 			await Task.Run(() =>
 			{
 				_config.GitPaths.ForEach(p =>
@@ -171,7 +232,7 @@ namespace gitup.ViewModels
 			this.IsEnable = true;
 		}
 
-		public async void AllFetch()
+		public async Task AllFetch()
 		{
 			if (!this.ValidAccessToken())
 			{
@@ -186,7 +247,7 @@ namespace gitup.ViewModels
 			RepoCollectionViewSource.View.Refresh();
 		}
 
-		public async void AllPull()
+		public async Task AllPull()
 		{
 			if (!this.ValidAccessToken())
 			{

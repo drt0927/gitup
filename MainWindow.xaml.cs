@@ -39,18 +39,15 @@ namespace gitup
 				SearchTextBox.Focus();
 			});
 
-			_shortcutProvider.AddEvent(Key.Enter, ModifierKeys.Control, (object sender, ExecutedRoutedEventArgs e) =>
+			_shortcutProvider.AddEvent(Key.Enter, ModifierKeys.Control, (async (object sender, ExecutedRoutedEventArgs e) =>
 			{
-				_viewModel.AllFetch();
-			}, grd);
+				await _viewModel.AllFetch();
+			}), grd);
 
-			_shortcutProvider.AddEvent(Key.T, ModifierKeys.Control, (object sender, ExecutedRoutedEventArgs e) =>
+			_shortcutProvider.AddEvent(Key.T, ModifierKeys.Control, (async (object sender, ExecutedRoutedEventArgs e) =>
 			{
-				foreach (RepositoryModel r in grd.SelectedItems)
-				{
-					r.Fetch();
-				}
-			});
+				await SelectedFetch();
+			}));
 
 			_shortcutProvider.AddEvent(Key.G, ModifierKeys.Control, (object sender, ExecutedRoutedEventArgs e) =>
 			{
@@ -102,9 +99,33 @@ namespace gitup
 			rtbLog.ScrollToEnd();
 		}
 
-		private void AllFetchTimer_Tick(object sender, EventArgs e)
+		private async Task SelectedFetch()
 		{
-			_viewModel.AllFetch();
+			var items = grd.SelectedItems;
+			await Task.Run(() =>
+			{
+				foreach (RepositoryModel r in items)
+				{
+					r.Fetch();
+				}
+			});
+		}
+
+		private async Task selectedPull()
+		{
+			var items = grd.SelectedItems;
+			await Task.Run(() =>
+			{
+				foreach (RepositoryModel r in items)
+				{
+					r.Pull();
+				}
+			});
+		}
+
+		private async void AllFetchTimer_Tick(object sender, EventArgs e)
+		{
+			await _viewModel.AllFetch();
 		}
 
 		private void btnSetting_Click(object sender, RoutedEventArgs e)
@@ -115,8 +136,25 @@ namespace gitup
 			if (setting.ShowDialog() ?? false)
 			{
 				rtbLog.Document.Blocks.Clear();
-				_viewModel.ReadFolder();
+				if (_viewModel.Config.PathType == 1)
+				{
+					_viewModel.ReadFolder();
+				}
+				else
+				{
+					_viewModel.ReadSlnFile();
+				}
 			}
+		}
+
+		private async void SelFetch_Click(object sender, RoutedEventArgs e)
+		{
+			await SelectedFetch();
+		}
+
+		private async void SelPull_Click(object sender, RoutedEventArgs e)
+		{
+			await SelectedFetch();
 		}
 	}
 }

@@ -43,7 +43,12 @@ namespace gitup.Providers
 	public class ConfigModel
 	{
 		public string AccessToken { get; set; }
-		public string VsPath { get; set; }
+		/// <summary>
+		/// 경로 타입 [ 1 - Root Folder Path | 2 - Solution File Path ]
+		/// </summary>
+		public int PathType { get; set; }
+		public string RootPath { get; set; }
+		public string SlnPath { get; set; }
 		public List<ConfigGitPathModel> GitPaths { get; set; }
 	}
 
