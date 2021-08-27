@@ -74,7 +74,7 @@ namespace gitup.ViewModels
 
 			AllFetchClickCommand = new DelegateCommand(async () => await AllFetch());
 			AllPullClickCommand = new DelegateCommand(async () => await AllPull());
-			LoadClickCommand = new DelegateCommand(LoadRepos);
+			LoadClickCommand = new DelegateCommand(async () => await LoadRepos());
 		}
 
 		private void RepoCollectionViewSource_Filter(object sender, FilterEventArgs e)
@@ -215,7 +215,7 @@ namespace gitup.ViewModels
 			this.IsEnable = true;
 		}
 
-		public async void LoadRepos()
+		public async Task LoadRepos()
 		{
 			this.IsEnable = false;
 

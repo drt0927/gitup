@@ -24,6 +24,7 @@
 			</StackPanel>
 
 			<StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+				<Button Content="Refresh" Width="90" IsEnabled="{Binding IsEnable}" Click="Refresh_Click"/>
 				<StackPanel>
 					<Button Content="Selected Fetch" Width="90" IsEnabled="{Binding IsEnable}" Click="SelFetch_Click" Background="AliceBlue"/>
 					<Button Content="All Fetch" Width="90" Command="{Binding AllFetchClickCommand}" IsEnabled="{Binding IsEnable}"/>

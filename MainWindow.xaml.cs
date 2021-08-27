@@ -58,10 +58,10 @@ namespace gitup
 				}
 			});
 
-			_shortcutProvider.AddEvent(Key.F5, (object sender, ExecutedRoutedEventArgs e) =>
+			_shortcutProvider.AddEvent(Key.F5, (async (object sender, ExecutedRoutedEventArgs e) =>
 			{
-				_viewModel.LoadRepos();
-			});
+				await _viewModel.LoadRepos();
+			}));
 			#endregion
 
 			#region " timer "
@@ -154,7 +154,12 @@ namespace gitup
 
 		private async void SelPull_Click(object sender, RoutedEventArgs e)
 		{
-			await SelectedFetch();
+			await selectedPull();
+		}
+
+		private async void Refresh_Click(object sender, RoutedEventArgs e)
+		{
+			await _viewModel.LoadRepos();
 		}
 	}
 }
