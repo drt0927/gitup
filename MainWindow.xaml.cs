@@ -161,5 +161,27 @@ namespace gitup
 		{
 			await _viewModel.LoadRepos();
 		}
+
+		private async void MenuItem_Click(object sender, RoutedEventArgs e)
+		{
+			BulkCreateBranch bulkCreateBranch = new BulkCreateBranch();
+			bulkCreateBranch.Owner = this;
+			bulkCreateBranch.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+			if (bulkCreateBranch.ShowDialog() ?? false)
+			{
+				var name = bulkCreateBranch.GetCreateBranchName();
+
+				var items = grd.SelectedItems;
+				await Task.Run(() =>
+				{
+					foreach (RepositoryModel r in items)
+					{
+						r.CreateBranch(name);
+					}
+				});
+
+				await _viewModel.LoadRepos();
+			}
+		}
 	}
 }

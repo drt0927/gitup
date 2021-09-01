@@ -17,7 +17,7 @@
 				<ColumnDefinition Width="300"/>
 				<ColumnDefinition Width="*"/>
 			</Grid.ColumnDefinitions>
-			
+
 			<StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
 				<Label Content="Search Name" Width="90"/>
 				<TextBox Name="SearchTextBox" Width="210" Text="{Binding Filter, UpdateSourceTrigger=PropertyChanged, Delay=500}"/>
@@ -38,6 +38,11 @@
 		</Grid>
 		<Grid Grid.Row="1">
 			<DataGrid x:Name="grd" ItemsSource="{Binding RepoCollection}" AutoGenerateColumns="False" CanUserAddRows="False">
+				<DataGrid.ContextMenu>
+					<ContextMenu>
+						<MenuItem Header="Create Branch" Click="MenuItem_Click"/>
+					</ContextMenu>
+				</DataGrid.ContextMenu>
 				<DataGrid.RowStyle>
 					<Style TargetType="DataGridRow">
 						<Setter Property="Height" Value="30"/>
@@ -180,7 +185,7 @@
 					</Style>
 				</RichTextBox.Resources>
 				<FlowDocument LineHeight="5" >
-					
+
 				</FlowDocument>
 			</RichTextBox>
 		</Grid>

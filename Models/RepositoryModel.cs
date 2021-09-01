@@ -303,6 +303,33 @@ namespace gitup.Models
 			}
 		}
 
+		public async void CreateBranch(string name)
+		{
+			try
+			{
+				IsFetchProgressStart = true;
+
+				await Task.Run(() =>
+				{
+					using (var repo = new Repository(this.Path))
+					{
+						var branch = repo.CreateBranch(name);
+						this.Checkout(branch.FriendlyName);
+					}
+				});
+
+				LogProvider.Instance.Info($"[{this.RepoName} - {name}] Branch가 생성 되었습니다.");
+			}
+			catch (Exception ex)
+			{
+				LogProvider.Instance.Error(new Exception($"[{this.RepoName} - {name}] Branch 생성중 에러가 발생하였습니다.\r\n{ex.Message}"));
+			}
+			finally
+			{
+				IsFetchProgressStart = false;
+			}
+		}
+
 		public void GoFork()
 		{
 			string strCmdText = $@"/c %localappdata%\fork\fork.exe {this.ParentPath}";

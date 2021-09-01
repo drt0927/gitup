@@ -66,11 +66,12 @@ namespace gitup.ViewModels
 
 			Repos = new ObservableCollection<RepositoryModel>();
 			BindingOperations.EnableCollectionSynchronization(Repos, _lock);
-			LoadRepos();
 
 			RepoCollectionViewSource = new CollectionViewSource();
 			RepoCollectionViewSource.Source = this.Repos;
 			RepoCollectionViewSource.Filter += RepoCollectionViewSource_Filter;
+
+			LoadRepos();
 
 			AllFetchClickCommand = new DelegateCommand(async () => await AllFetch());
 			AllPullClickCommand = new DelegateCommand(async () => await AllPull());

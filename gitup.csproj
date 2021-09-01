@@ -72,6 +72,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BulkCreateBranch.xaml.cs">
+      <DependentUpon>BulkCreateBranch.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ChangesWindow.xaml.cs">
       <DependentUpon>ChangesWindow.xaml</DependentUpon>
     </Compile>
@@ -94,6 +97,10 @@
     <Compile Include="ViewModels\ChangesViewModel.cs" />
     <Compile Include="ViewModels\CommitsViewModel.cs" />
     <Compile Include="ViewModels\MainVieModel.cs" />
+    <Page Include="BulkCreateBranch.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ChangesWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

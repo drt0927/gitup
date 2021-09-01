@@ -1,0 +1,19 @@
+﻿<Window x:Class="gitup.BulkCreateBranch"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:gitup"
+        mc:Ignorable="d"
+        Title="BulkCreateBranch" Height="70" Width="400">
+    <Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="100"/>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="100"/>
+		</Grid.ColumnDefinitions>
+		<Label Content="Branch Name :" Grid.Column="0" VerticalAlignment="Center"/>
+		<TextBox Name="tbBranchName" Grid.Column="1" VerticalAlignment="Center"/>
+		<Button Name="btnCreate" Content="Create" Grid.Column="2" VerticalAlignment="Center" Click="btnCreate_Click"/>
+	</Grid>
+</Window>
