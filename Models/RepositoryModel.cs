@@ -69,6 +69,7 @@ namespace gitup.Models
 			}
 		}
 		public IEnumerable<string> BranchNames => this.Branches.Select(b => b.OnlyName);
+		public IEnumerable<string> BranchLowerNames => this.Branches.Select(b => b.OnlyName.ToLower());
 		public List<BranchModel> OriginBranches
 		{
 			get => _originBranches;
@@ -80,8 +81,9 @@ namespace gitup.Models
 			}
 		}
 		public IEnumerable<string> OriginBranchNames => this.OriginBranches.Select(b => b.OnlyName);
-		public int LocalBranchDiffCount => this.BranchNames.Except(this.OriginBranchNames).Count();
-		public int RemoteBranchDiffCount => this.OriginBranchNames.Except(this.BranchNames).Count();
+		public IEnumerable<string> OriginBranchLowerNames => this.OriginBranches.Select(b => b.OnlyName.ToLower());
+		public int LocalBranchDiffCount => this.BranchLowerNames.Except(this.OriginBranchLowerNames).Count();
+		public int RemoteBranchDiffCount => this.OriginBranchLowerNames.Except(this.BranchLowerNames).Count();
 		public bool IsHighlightBranchDiff => this.LocalBranchDiffCount > 0 || this.RemoteBranchDiffCount > 0;
 		public string BranchDiffCountString => $"↑{this.LocalBranchDiffCount} ↓{this.RemoteBranchDiffCount}";
 		public int ChangesCount
@@ -169,9 +171,9 @@ namespace gitup.Models
 				this.OriginBranches = new List<BranchModel>();
 			}
 			this.Branches.Clear();
-			this.Branches.AddRange(repo.Branches.Where(b => !b.FriendlyName.ToLower().StartsWith("origin")).Select(b => new BranchModel(b)));
+			this.Branches.AddRange(repo.Branches.Where(b => !b.FriendlyName.StartsWith("origin", StringComparison.OrdinalIgnoreCase)).Select(b => new BranchModel(b)));
 			this.OriginBranches.Clear();
-			this.OriginBranches.AddRange(repo.Branches.Where(b => b.FriendlyName.ToLower().StartsWith("origin") && !b.FriendlyName.ToLower().StartsWith("origin/HEAD".ToLower())).Select(b => new BranchModel(b)));
+			this.OriginBranches.AddRange(repo.Branches.Where(b => b.FriendlyName.StartsWith("origin", StringComparison.OrdinalIgnoreCase) && !b.FriendlyName.StartsWith("origin/HEAD", StringComparison.OrdinalIgnoreCase)).Select(b => new BranchModel(b)));
 			this._currentBranch = this.Branches.FirstOrDefault(b => b.Name == repo.Head.FriendlyName);
 			this.ChangesCount = repo.GetChangesCount();
 		}

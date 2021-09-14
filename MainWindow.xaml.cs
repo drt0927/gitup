@@ -96,6 +96,10 @@ namespace gitup
 			Paragraph p = new Paragraph();
 			p.Inlines.Add(b);
 			rtbLog.Document.Blocks.Add(p);
+			if (rtbLog.Document.Blocks.Count > 50)
+			{
+				rtbLog.Document.Blocks.Remove(rtbLog.Document.Blocks.FirstOrDefault());
+			}
 			rtbLog.ScrollToEnd();
 		}
 

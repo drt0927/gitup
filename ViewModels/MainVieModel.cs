@@ -88,7 +88,7 @@ namespace gitup.ViewModels
 			}
 			else
 			{
-				e.Accepted = svm.RepoName.ToLower().Contains(Filter.ToLower()) || svm.CurrentBranch.Name.ToLower().Contains(Filter.ToLower());
+				e.Accepted = svm.RepoName.IndexOf(Filter, StringComparison.OrdinalIgnoreCase) >= 0 || svm.CurrentBranch.Name.IndexOf(Filter, StringComparison.OrdinalIgnoreCase) >= 0;
 			}
 		}
 
