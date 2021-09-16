@@ -19,7 +19,7 @@ using System.Text.RegularExpressions;
 
 namespace gitup.ViewModels
 {
-	public class MainVieModel : INotifyPropertyChanged
+	public class MainViewModel : INotifyPropertyChanged
 	{
 		private readonly object _lock = new object();
 		private ConfigModel _config;
@@ -60,7 +60,7 @@ namespace gitup.ViewModels
 		public ICommand AllFetchClickCommand { get; set; }
 		public ICommand AllPullClickCommand { get; set; }
 		public ICommand LoadClickCommand { get; set; }
-		public MainVieModel()
+		public MainViewModel()
 		{
 			_config = ConfigProvider.Read();
 

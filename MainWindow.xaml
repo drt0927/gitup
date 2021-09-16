@@ -62,7 +62,7 @@
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="Changes" Binding="{Binding ChangesCount, Mode=TwoWay}" IsReadOnly="True">
+                    <DataGridTextColumn Header="Changes" Binding="{Binding ChangesCount}" IsReadOnly="True">
 						<DataGridTextColumn.ElementStyle>
 							<Style TargetType="TextBlock">
 								<Setter Property="HorizontalAlignment" Value="Center"/>
@@ -74,9 +74,10 @@
 					<DataGridTemplateColumn Header="Branch">
 						<DataGridTemplateColumn.CellTemplate>
 							<DataTemplate>
-								<ComboBox ItemsSource="{Binding Branches, Mode=TwoWay}"
-										  DisplayMemberPath="Name"
+								<ComboBox ItemsSource="{Binding Branches}"
+										  DisplayMemberPath="DisplayName"
 										  SelectedItem="{Binding CurrentBranch, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+										  Foreground="{Binding IsRemotePullColor}"
 										  >
 								</ComboBox>
 							</DataTemplate>
@@ -86,7 +87,7 @@
 						<DataGridTemplateColumn.CellTemplate>
 							<DataTemplate>
 								<ComboBox ItemsSource="{Binding OriginBranches, Mode=TwoWay}"
-										  DisplayMemberPath="Name"
+										  DisplayMemberPath="DisplayName"
 										  >
 								</ComboBox>
 							</DataTemplate>

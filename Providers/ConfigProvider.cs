@@ -13,7 +13,7 @@ namespace gitup.Providers
 	{
 		private static string filePath = System.IO.Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
 		private static string fileName = "gitup-config.json";
-		private static string fileFullPath => $@"{filePath}\{fileName}"; 
+		private static string fileFullPath => $@"{filePath}\{fileName}";
 		public static void Write(ConfigModel config)
 		{
 			File.WriteAllText(fileFullPath, JsonConvert.SerializeObject(config, Formatting.Indented), Encoding.UTF8);

@@ -24,7 +24,7 @@ namespace gitup
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-		private MainVieModel _viewModel;
+		private MainViewModel _viewModel;
 		private ShortcutProvider _shortcutProvider;
 		public MainWindow()
 		{
@@ -72,7 +72,7 @@ namespace gitup
 			allFetchTimer.Start();
 			#endregion
 
-			_viewModel = new MainVieModel();
+			_viewModel = new MainViewModel();
 			this.DataContext = _viewModel;
 		}
 

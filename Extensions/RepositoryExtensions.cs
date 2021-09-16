@@ -14,12 +14,12 @@ namespace gitup.Extensions
 	{
 		public static IEnumerable<BranchModel> GetLocalBranchModels(this BranchCollection branches)
 		{
-			return branches.Where(b => !b.FriendlyName.ToLower().StartsWith("origin")).Select(b => new BranchModel(b));
+			return branches.Where(b => !b.IsRemote).Select(b => new BranchModel(b));
 		}
 
 		public static IEnumerable<BranchModel> GetRemoteBranchModels(this BranchCollection branches)
 		{
-			return branches.Where(b => b.FriendlyName.ToLower().StartsWith("origin") && !b.FriendlyName.ToLower().StartsWith("origin/HEAD".ToLower())).Select(b => new BranchModel(b));
+			return branches.Where(b => b.IsRemote).Select(b => new BranchModel(b));
 		}
 
 		public static int GetChangesCount(this Repository repository)

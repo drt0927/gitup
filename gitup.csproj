@@ -96,7 +96,7 @@
     <Compile Include="Utils\DispatcherUtil.cs" />
     <Compile Include="ViewModels\ChangesViewModel.cs" />
     <Compile Include="ViewModels\CommitsViewModel.cs" />
-    <Compile Include="ViewModels\MainVieModel.cs" />
+    <Compile Include="ViewModels\MainViewModel.cs" />
     <Page Include="BulkCreateBranch.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

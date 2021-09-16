@@ -36,7 +36,7 @@ namespace gitup.Models
 		public string RepoName { get; set; }
 		public string Path { get; set; }
 		public string ParentPath { get; set; }
-		public bool IsHighlightRow => ChangesCount > 0 || ((_currentBranch.Ahead ?? 0) + (_currentBranch.Behind ?? 0)) > 0;
+		public bool IsHighlightRow => ChangesCount > 0 || ((_currentBranch?.Ahead ?? 0) + (_currentBranch?.Behind ?? 0)) > 0;
 		public BranchModel CurrentBranch
 		{
 			get => _currentBranch;
@@ -48,13 +48,14 @@ namespace gitup.Models
 				DispatcherUtil.BeginInvoke(new Action(() =>
 				{
 					// Branches 변경 로직
-					if (!Checkout(value.Name))
+					if (!string.IsNullOrEmpty(value?.Name) && !Checkout(value?.Name))
 					{
 						_currentBranch = pre;
 					}
 
 					OnPropertyChanged(nameof(CurrentBranch));
 					OnPropertyChanged(nameof(IsHighlightRow));
+					OnPropertyChanged(nameof(IsRemotePullColor));
 				}));
 			}
 		}
@@ -66,6 +67,7 @@ namespace gitup.Models
 				_branches = value;
 				OnPropertyChanged(nameof(Branches));
 				OnPropertyChanged(nameof(BranchDiffCountString));
+				OnPropertyChanged(nameof(IsRemotePullColor));
 			}
 		}
 		public IEnumerable<string> BranchNames => this.Branches.Select(b => b.OnlyName);
@@ -86,6 +88,8 @@ namespace gitup.Models
 		public int RemoteBranchDiffCount => this.OriginBranchLowerNames.Except(this.BranchLowerNames).Count();
 		public bool IsHighlightBranchDiff => this.LocalBranchDiffCount > 0 || this.RemoteBranchDiffCount > 0;
 		public string BranchDiffCountString => $"↑{this.LocalBranchDiffCount} ↓{this.RemoteBranchDiffCount}";
+		public bool IsRemotePull => this.Branches.Any(b => (b.Ahead ?? 0) > 0 || (b.Behind ?? 0) > 0);
+		public string IsRemotePullColor => this.IsRemotePull ? "red" : "black";
 		public int ChangesCount
 		{
 			get => _changesCount;
@@ -170,11 +174,15 @@ namespace gitup.Models
 			{
 				this.OriginBranches = new List<BranchModel>();
 			}
-			this.Branches.Clear();
-			this.Branches.AddRange(repo.Branches.Where(b => !b.FriendlyName.StartsWith("origin", StringComparison.OrdinalIgnoreCase)).Select(b => new BranchModel(b)));
-			this.OriginBranches.Clear();
-			this.OriginBranches.AddRange(repo.Branches.Where(b => b.FriendlyName.StartsWith("origin", StringComparison.OrdinalIgnoreCase) && !b.FriendlyName.StartsWith("origin/HEAD", StringComparison.OrdinalIgnoreCase)).Select(b => new BranchModel(b)));
-			this._currentBranch = this.Branches.FirstOrDefault(b => b.Name == repo.Head.FriendlyName);
+			//this.Branches.Clear();
+			//this.Branches.AddRange(repo.Branches.Where(b => !b.IsRemote).Select(b => new BranchModel(b)));
+			this.Branches = repo.Branches.Where(b => !b.IsRemote).Select(b => new BranchModel(b)).ToList();
+			//OnPropertyChanged(nameof(this.Branches));
+			//this.OriginBranches.Clear();
+			//this.OriginBranches.AddRange(repo.Branches.Where(b => b.IsRemote && !b.FriendlyName.Contains("HEAD")).Select(b => new BranchModel(b)));
+			//OnPropertyChanged(nameof(this.OriginBranches));
+			this.OriginBranches = repo.Branches.Where(b => b.IsRemote && !b.FriendlyName.Contains("HEAD")).Select(b => new BranchModel(b)).ToList();
+			this.CurrentBranch = this.Branches.FirstOrDefault(b => b.Name == repo.Head.FriendlyName);
 			this.ChangesCount = repo.GetChangesCount();
 		}
 		#endregion

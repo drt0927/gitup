@@ -17,6 +17,7 @@ namespace gitup.Models
 
 		#region " Public "
 		public string Name { get; set; }
+		public string DisplayName => $"{this.Name} {this.Status}";
 		public string OnlyName { get; set; }
 		public int? Ahead
 		{
@@ -63,6 +64,22 @@ namespace gitup.Models
 			this.Ahead = branch.TrackingDetails.AheadBy;
 			this.Behind = branch.TrackingDetails.BehindBy;
 		}
+
+		//public BranchModel(Branch branch, Repository repo) : this(branch)
+		//{
+		//	if (branch.IsRemote && repo.Head != branch)
+		//	{
+		//		var div = repo.ObjectDatabase.CalculateHistoryDivergence(branch.Tip, repo.Head.Tip);
+
+		//		this.Ahead = div.AheadBy;
+		//		this.Behind = div.BehindBy;
+		//	}
+		//	else
+		//	{
+		//		this.Ahead = branch.TrackingDetails.AheadBy;
+		//		this.Behind = branch.TrackingDetails.BehindBy;
+		//	}
+		//}
 
 		public event PropertyChangedEventHandler PropertyChanged;
 		public void OnPropertyChanged(string propertyName)
