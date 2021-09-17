@@ -174,15 +174,11 @@ namespace gitup.Models
 			{
 				this.OriginBranches = new List<BranchModel>();
 			}
-			//this.Branches.Clear();
-			//this.Branches.AddRange(repo.Branches.Where(b => !b.IsRemote).Select(b => new BranchModel(b)));
 			this.Branches = repo.Branches.Where(b => !b.IsRemote).Select(b => new BranchModel(b)).ToList();
-			//OnPropertyChanged(nameof(this.Branches));
-			//this.OriginBranches.Clear();
-			//this.OriginBranches.AddRange(repo.Branches.Where(b => b.IsRemote && !b.FriendlyName.Contains("HEAD")).Select(b => new BranchModel(b)));
-			//OnPropertyChanged(nameof(this.OriginBranches));
 			this.OriginBranches = repo.Branches.Where(b => b.IsRemote && !b.FriendlyName.Contains("HEAD")).Select(b => new BranchModel(b)).ToList();
 			this.CurrentBranch = this.Branches.FirstOrDefault(b => b.Name == repo.Head.FriendlyName);
+			this._currentBranch = this.Branches.FirstOrDefault(b => b.Name == repo.Head.FriendlyName);
+
 			this.ChangesCount = repo.GetChangesCount();
 		}
 		#endregion
